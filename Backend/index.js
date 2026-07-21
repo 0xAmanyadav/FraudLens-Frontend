@@ -1,15 +1,24 @@
 import app from './app.js'
 import dotenv from "dotenv";
+import connectDB from './src/db/connect.db.js';
 
 dotenv.config();
-const PORT = process.env.PORT||8000;
-
-app.get('/',(req,res)=>{
-    console.log("helllo this is my first sever")
-})
 
 
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+
+
+
+connectDB().then(()=>{
+  try{
+    app.listen(process.env.PORT || 8000, () => {
+  console.log(`Server is running on port ${process.env.PORT || 8000}`);
 });
+ // Handle server errors (like port already in use)
+        app.on("error", (error) => {
+            console.error("Error occurred at server:", error);
+        });
+  }catch(error){
+    console.error("Error occurred at server:", error);
+  }
+})
