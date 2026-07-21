@@ -4,11 +4,6 @@ import connectDB from './src/db/connect.db.js';
 
 dotenv.config();
 
-
-
-
-
-
 connectDB().then(()=>{
   try{
     app.listen(process.env.PORT || 8000, () => {
