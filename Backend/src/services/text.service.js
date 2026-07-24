@@ -6,13 +6,14 @@ import { openRouterClient } from "../config/openRouter.js";
 
 
 // AI response validation schema
-const urlThreatSchema = z.object({
+const textThreatSchema = z.object({
+
     overallStatus: z.enum([
         "Safe",
         "Low Risk",
         "Medium Risk",
         "High Risk",
-        "Critical",
+        "Critical"
     ]),
 
     riskScore: z.number().min(0).max(100),
@@ -28,22 +29,35 @@ const urlThreatSchema = z.object({
             title: z.string(),
             description: z.string(),
         })
-    ),
+    ).min(1),
 
-    recommendations: z.array(z.string()),
+    recommendations: z.array(
+        z.string()
+    ).min(1),
 
     aiExplanation: z.string(),
 
     technicalAnalysis: z.object({
-        protocol: z.string(),
-        brandDetected: z.string().nullable(),
-        typosquattingDetected: z.boolean(),
-        suspiciousWords: z.array(z.string()),
+
+        containsLink: z.boolean(),
+
+        containsPhoneNumber: z.boolean(),
+
+        containsEmail: z.boolean(),
+
+        containsOTPRequest: z.boolean(),
+
+        containsUrgency: z.boolean(),
+
+        containsFinancialRequest: z.boolean(),
+
+        suspiciousKeywords: z.array(z.string())
+
     }),
 
-    scanTimestamp: z.string(),
-});
+    scanTimestamp: z.string().optional()
 
+});
 
 // Scan URL
 export const scanText = async (text) => {
