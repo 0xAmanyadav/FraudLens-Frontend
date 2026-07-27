@@ -29,11 +29,13 @@ import {asyncHandler} from '../utiles/asyncHandler.js'
     return res.status(200).json(
         new ApiResponse(
             200,
-            {
-                imageUrl: uploadedImage.secure_url,
-                publicId: uploadedImage.public_id,
-                analysis: result,
-            },
+           {
+    screenshot: {
+        imageUrl: uploadedImage.secure_url,
+        publicId: uploadedImage.public_id
+    },
+    analysis: result
+},
             "Screenshot analyzed successfully"
         )
     );
