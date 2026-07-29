@@ -12,7 +12,7 @@ import {
   Globe,
   ArrowRight,
   Moon, // Moon आइकॉन जोड़ा
-  Sun, // Sun आइकॉन जोड़ा hai
+  Sun, // Sun आइकॉन जोड़ा
 } from "lucide-react";
 
 export default function About() {
