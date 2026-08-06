@@ -5,7 +5,6 @@ import {
   Menu,
   Search,
   Bell,
-  Grid,
   ShieldCheck,
   Sun,
   Moon,
@@ -13,20 +12,21 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
+import { auth } from "../firebase/firebase";
 
 export default function Navbar({ toggleSidebar }) {
-  // Global theme state from next-themes
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
-  // States for Dropdown
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-
-  // Dropdown ko bahar click karne par band karne ke liye Ref
   const dropdownRef = useRef(null);
 
-  // Mount check for theme
+  const currentUser = auth.currentUser;
+  const displayName = currentUser?.displayName;
+  const displayInitial = displayName.charAt(0).toUpperCase();
+  const isDark = mounted && theme === "dark";
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -41,14 +41,7 @@ export default function Navbar({ toggleSidebar }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const displayName = "User";
-  const displayInitial = displayName.charAt(0).toUpperCase();
-  const isDark = mounted && theme === "dark";
-
-  // Logout Handler - TODO: Add Firebase signOut when auth is configured
   const handleLogout = () => {
-    // TODO: Implement Firebase logout
-    // await signOut(auth);
     navigate("/login");
   };
 
@@ -62,7 +55,6 @@ export default function Navbar({ toggleSidebar }) {
     >
       {/* ================= LEFT SIDE (Menu + Logo) ================= */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Hamburger Menu */}
         <button
           onClick={toggleSidebar}
           className={`p-2 rounded-lg transition-colors focus:outline-none ${
@@ -74,7 +66,6 @@ export default function Navbar({ toggleSidebar }) {
           <Menu size={22} />
         </button>
 
-        {/* Brand Logo - Clickable to Dashboard */}
         <Link
           to="/app/dashboard"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -125,17 +116,7 @@ export default function Navbar({ toggleSidebar }) {
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
         </button>
 
-        {/* Other Icons */}
-        <button
-          className={`p-2 rounded-full transition-colors hidden sm:block ${
-            isDark
-              ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-              : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          <Grid size={20} />
-        </button>
-
+        {/* Notification Bell */}
         <button
           className={`p-2 rounded-full transition-colors relative ${
             isDark
@@ -158,20 +139,14 @@ export default function Navbar({ toggleSidebar }) {
             className="flex items-center gap-3 pl-1 focus:outline-none hover:opacity-80 transition-opacity"
           >
             <div className="hidden sm:flex flex-col items-end">
-              {/* Dynamic Username Rendering */}
               <span
                 className={`text-sm font-bold leading-tight capitalize ${isDark ? "text-white" : "text-slate-900"}`}
               >
                 {displayName}
               </span>
-              <span
-                className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}
-              >
-                Pro Plan
-              </span>
+              
             </div>
 
-            {/* Profile Avatar Initial */}
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-sm font-bold text-sm">
               {displayInitial}
             </div>
@@ -186,7 +161,6 @@ export default function Navbar({ toggleSidebar }) {
                   : "bg-white border-slate-100"
               }`}
             >
-              {/* Mobile Only: Show name inside dropdown if hidden outside */}
               <div
                 className={`sm:hidden px-4 py-3 border-b mb-2 ${
                   isDark ? "border-slate-700" : "border-slate-100"

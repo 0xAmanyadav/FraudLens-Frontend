@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
-  MessageSquare,
+  Image as ImageIcon,
   Activity,
   ArrowRight,
   XCircle,
@@ -9,82 +9,159 @@ import {
   ShieldAlert,
   Info,
   Check,
-  Cpu,
+  Upload,
+  X,
+  Terminal,
 } from "lucide-react";
 import { scanTarget } from "../services/api";
 
-export default function MessageScanner() {
-  const [message, setMessage] = useState("");
+export default function ScreenshotScanner() {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please upload a valid image file (PNG, JPG, JPEG).");
+        return;
+      }
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      setError("");
+      setResult(null);
+    }
+  };
 
   const handleScan = async (e) => {
     e.preventDefault();
-    if (!message) return;
+    if (!selectedImage) {
+      setError("Please select or upload a screenshot first!");
+      return;
+    }
 
     setIsScanning(true);
     setResult(null);
     setError("");
 
     try {
-      const response = await scanTarget("text", { text: message });
-      console.log("Full API Response:", response);
+      const formData = new FormData();
+      formData.append("image", selectedImage);
 
-      // FIX: response.message poora analysis object hai, use pehle extract karein
-      const scanResult = response.message || response.data || response;
-      setResult(scanResult);
+      const response = await scanTarget("screenshot", formData);
+      console.log("Full Image Scan API Response:", response);
+
+      // Extracting the nested 'analysis' object based on your updated backend response structure
+      const scanData =
+        response.message?.analysis ||
+        response.message ||
+        response.data ||
+        response;
+      setResult(scanData);
     } catch (err) {
-      console.error("Scan error:", err);
-      setError(err.message || "Something went wrong during scanning.");
+      console.error("Screenshot scan error:", err);
+      setError(
+        err.message || "Something went wrong during screenshot scanning.",
+      );
     } finally {
       setIsScanning(false);
     }
   };
 
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setResult(null);
+    setError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const isHighRisk =
     result?.overallStatus?.toLowerCase().includes("high") ||
-    result?.riskScore > 50;
+    result?.overallStatus?.toLowerCase().includes("suspicious") ||
+    (result?.riskScore ?? 0) > 40;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 text-slate-900 dark:text-slate-100 pb-10">
       {/* HEADER */}
       <div className="flex flex-col items-center text-center">
         <div className="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 mb-3 text-indigo-600 dark:text-indigo-400">
-          <MessageSquare size={32} />
+          <ImageIcon size={32} />
         </div>
         <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Text / Message Scanner
+          Screenshot & Image Scanner
         </h1>
         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-lg leading-relaxed">
-          Paste your text, SMS, or suspicious email content. Our AI agents will
-          inspect it against global threat intelligence.
+          Upload screenshots of chat messages, receipts, or technical logs. Our
+          AI vision agents inspect them for security threats.
         </p>
       </div>
 
-      {/* SCANNER BOX */}
+      {/* SCANNER BOX / UPLOAD AREA */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
         <form onSubmit={handleScan} className="space-y-4">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Paste your message here (e.g., You have an unpaid toll payment...)"
-            className="w-full h-40 p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm resize-none text-slate-900 dark:text-white placeholder:text-slate-400"
-            required
-          />
+          {!imagePreview ? (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-slate-50 dark:bg-slate-950 transition-all group"
+            >
+              <div className="p-4 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 mb-3 group-hover:scale-110 transition-transform">
+                <Upload size={28} />
+              </div>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                Click to upload screenshot{" "}
+                <span className="font-normal text-slate-500">
+                  or drag and drop
+                </span>
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                PNG, JPG, JPEG up to 10MB
+              </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          ) : (
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 p-2 flex items-center justify-center max-h-80">
+              <img
+                src={imagePreview}
+                alt="Upload Preview"
+                className="max-h-72 object-contain rounded-xl"
+              />
+              <button
+                type="button"
+                onClick={clearImage}
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/60 hover:bg-black text-white transition-colors"
+                title="Remove image"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={isScanning || !message}
+            disabled={isScanning || !selectedImage}
             className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
           >
             {isScanning ? (
               <>
-                <Activity className="animate-spin" size={18} /> Analyzing Threat
-                Patterns...
+                <Activity className="animate-spin" size={18} /> Inspecting Image
+                via Vision AI...
               </>
             ) : (
               <>
-                Scan Message <ArrowRight size={18} />
+                Scan Screenshot <ArrowRight size={18} />
               </>
             )}
           </button>
@@ -102,12 +179,20 @@ export default function MessageScanner() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* TOP STATUS CARD */}
           <div
-            className={`p-6 sm:p-8 rounded-3xl border ${isHighRisk ? "bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-500/30" : "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-500/30"}`}
+            className={`p-6 sm:p-8 rounded-3xl border ${
+              isHighRisk
+                ? "bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-500/30"
+                : "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-500/30"
+            }`}
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div
-                  className={`p-4 rounded-2xl ${isHighRisk ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400" : "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"}`}
+                  className={`p-4 rounded-2xl ${
+                    isHighRisk
+                      ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
+                      : "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                  }`}
                 >
                   {isHighRisk ? (
                     <XCircle size={32} />
@@ -151,7 +236,11 @@ export default function MessageScanner() {
                   Risk Score
                 </p>
                 <p
-                  className={`text-2xl sm:text-3xl font-black ${isHighRisk ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}
+                  className={`text-2xl sm:text-3xl font-black ${
+                    isHighRisk
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-emerald-600 dark:text-emerald-400"
+                  }`}
                 >
                   {result.riskScore}
                   <span className="text-xs text-slate-400">/100</span>
@@ -165,12 +254,12 @@ export default function MessageScanner() {
             </p>
           </div>
 
-          {/* AI EXPLANATION */}
+          {/* AI VISION EXPLANATION */}
           {result.aiExplanation && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-3">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold">
                 <Info size={20} />
-                <h3>AI Detailed Breakdown</h3>
+                <h3>AI Vision Analysis</h3>
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 {result.aiExplanation}
@@ -178,67 +267,67 @@ export default function MessageScanner() {
             </div>
           )}
 
-          {/* TECHNICAL ANALYSIS FLAGS (Mapped from your new response structure) */}
+          {/* TECHNICAL ANALYSIS FLAGS */}
           {result.technicalAnalysis && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <Cpu className="text-indigo-500" size={20} />
-                Technical Analysis Flags
+                <Terminal className="text-indigo-500" size={20} />
+                Technical Feature Flags
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Link:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsLink ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsLink ? "Yes" : "None"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">OTP Request:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsOTPRequest ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsOTPRequest ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Financial:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsFinancialRequest ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsFinancialRequest
-                      ? "Yes"
-                      : "No"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Phone No:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsPhoneNumber ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsPhoneNumber
-                      ? "Yes"
-                      : "No"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Urgency:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsUrgency ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsUrgency ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Email:</span>
-                  <span
-                    className={`text-xs font-bold ${result.technicalAnalysis.containsEmail ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {result.technicalAnalysis.containsEmail ? "Yes" : "No"}
-                  </span>
-                </div>
+                {Object.entries(result.technicalAnalysis).map(
+                  ([key, value], idx) => {
+                    if (key === "suspiciousKeywords") return null; // Handle array separately if needed
+                    const formattedKey = key
+                      .replace(/([A-Z])/g, " $1")
+                      .replace(/^./, (str) => str.toUpperCase());
+
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                      >
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          {formattedKey}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                            typeof value === "boolean"
+                              ? value
+                                ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+                                : "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+                          }`}
+                        >
+                          {String(value)}
+                        </span>
+                      </div>
+                    );
+                  },
+                )}
               </div>
+
+              {/* Suspicious Keywords Sub-section */}
+              {result.technicalAnalysis.suspiciousKeywords &&
+                result.technicalAnalysis.suspiciousKeywords.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                      Suspicious Keywords Detected
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.technicalAnalysis.suspiciousKeywords.map(
+                        (kw, i) => (
+                          <span
+                            key={i}
+                            className="text-xs font-mono px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50"
+                          >
+                            {kw}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
 
@@ -247,7 +336,7 @@ export default function MessageScanner() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
               <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <ShieldAlert className="text-amber-500" size={20} />
-                Detected Threat Vectors
+                Identified Threat Vectors
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {result.reasons.map((reason, idx) => (
@@ -257,10 +346,10 @@ export default function MessageScanner() {
                   >
                     <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                      {reason.title}
+                      {reason.title || `Indicator ${idx + 1}`}
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      {reason.description}
+                      {reason.description || reason}
                     </p>
                   </div>
                 ))}

@@ -29,10 +29,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: "Dashboard", path: "/app/dashboard", icon: LayoutDashboard },
     { name: "AI Scan Center", path: "/app/dashboard/scan", icon: ScanSearch },
     { name: "URL Scanner", path: "/app/dashboard/url", icon: LinkIcon },
-    { name: "Message Scanner", path: "/app/dashboard/message", icon: MessageSquare },
+    { name: "Text Scanner", path: "/app/dashboard/message", icon: MessageSquare },
     { name: "QR Scanner", path: "/app/dashboard/qr", icon: QrCode },
+    { name: "Screenshot Scanner", path: "/app/dashboard/image", icon: ImageIcon },
     { name: "Browser Extension", path: "/app/dashboard/extension", icon: Puzzle },
-    { name: "Threat Intelligence", path: "/app/dashboard/intelligence", icon: Activity },
     { name: "History", path: "/app/dashboard/history", icon: History },
   ];
 

@@ -1,148 +1,496 @@
-import React from "react";
-import { Link as LinkIcon, MessageSquare, Upload, AlertTriangle } from "lucide-react";
-import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
+import {
+  Link as LinkIcon,
+  MessageSquare,
+  Upload,
+  QrCode,
+  TrendingUp,
+  Activity,
+  UserCheck,
+  Lock,
+  Zap,
+  ArrowRight,
+} from "lucide-react";
+import { Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { auth } from "../firebase/firebase";
+import { fetchScanHistory } from "../services/api";
 
-// --- MOCK DATA ---
 const trendData = [
-  { name: 'Jan', threats: 40 }, { name: 'Feb', threats: 30 },
-  { name: 'Mar', threats: 70 }, { name: 'Apr', threats: 45 },
-  { name: 'May', threats: 90 }, { name: 'Jun', threats: 65 },
-  { name: 'Jul', threats: 110 }
+  { name: "Jan", threats: 40, safe: 120 },
+  { name: "Feb", threats: 30, safe: 150 },
+  { name: "Mar", threats: 70, safe: 200 },
+  { name: "Apr", threats: 45, safe: 180 },
+  { name: "May", threats: 90, safe: 310 },
+  { name: "Jun", threats: 65, safe: 270 },
+  { name: "Jul", threats: 110, safe: 400 },
 ];
 
 export default function DashboardHome() {
+  const currentUser = auth.currentUser;
+  const userName = currentUser?.displayName;
+  const userEmail = currentUser?.email;
+
+  const memberSince = currentUser?.metadata?.creationTime
+    ? new Date(currentUser.metadata.creationTime).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      })
+    : "Nov 2025";
+
+  // Real Backend History States
+  const [historyList, setHistoryList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real scan history using shared api service
+  useEffect(() => {
+    const loadDashboardHistory = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchScanHistory();
+        const logs = response.message || response.data || [];
+        setHistoryList(Array.isArray(logs) ? logs : []);
+      } catch (error) {
+        console.error("Failed to fetch dashboard history:", error);
+        setHistoryList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardHistory();
+  }, []);
+
+  // --- CALCULATE METRICS FROM REAL BACKEND HISTORY ---
+  const totalScansLifetime = historyList.length;
+
+  const todayStr = new Date().toDateString();
+  const scansToday = historyList.filter((item) => {
+    const itemDate = item.createdAt || item.timestamp;
+    return itemDate && new Date(itemDate).toDateString() === todayStr;
+  }).length;
+
+  const threatsBlocked = historyList.filter((item) => {
+    const score = item.result?.riskScore ?? item.risk ?? 0;
+    const status = (
+      item.result?.overallStatus ||
+      item.result?.status ||
+      ""
+    ).toLowerCase();
+    return (
+      score > 40 ||
+      status.includes("high") ||
+      status.includes("blocked") ||
+      status.includes("phishing")
+    );
+  }).length;
+
+  const highRiskAlerts = historyList.filter((item) => {
+    const score = item.result?.riskScore ?? item.risk ?? 0;
+    return score > 70;
+  }).length;
+
+  const avgRiskScore =
+    historyList.length > 0
+      ? historyList.reduce(
+          (acc, curr) => acc + (curr.result?.riskScore ?? curr.risk ?? 0),
+          0,
+        ) / historyList.length
+      : 0;
+
+  const currentThreatLevel =
+    avgRiskScore > 60
+      ? "High Risk"
+      : avgRiskScore > 30
+        ? "Medium Risk"
+        : "Low Risk";
+  const threatBadgeColor =
+    avgRiskScore > 60
+      ? "text-red-600 bg-red-50 dark:bg-red-950/50"
+      : avgRiskScore > 30
+        ? "text-amber-600 bg-amber-50 dark:bg-amber-950/50"
+        : "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50";
+
   return (
-    // 🛠️ FIX 1: Added pb-8 (padding-bottom) to prevent layout shifting at the very bottom
-    <div className="max-w-7xl mx-auto space-y-6 text-slate-900 pb-8">
-      
-      {/* Top Banner Row */}
-      <div className="flex flex-col xl:flex-row gap-6">
-        <div className="flex-1 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-7xl mx-auto space-y-8 text-slate-900 dark:text-slate-100 pb-12">
+      {/* 1. WHITE THEME BANNER WITH DARK MODE TOGGLE SUPPORT */}
+      <div className="relative overflow-hidden bg-white dark:bg-gradient-to-r dark:from-indigo-950 dark:via-slate-900 dark:to-blue-950 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 dark:border-indigo-500/20 transition-colors">
+        <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight capitalize">
+              Welcome Back, {userName}! 👋
+            </h1>
+            <p className="text-slate-600 dark:text-slate-300 text-sm max-w-xl">
+              Your security agents are actively monitoring URLs, messages, and
+              screenshots for zero-day phishing vectors. All systems secure.
+            </p>
+          </div>
+
+          {/* System Health Score Badge */}
+          <div className="bg-slate-50 dark:bg-white/10 backdrop-blur-md border border-slate-200 dark:border-white/10 p-4 rounded-2xl flex items-center gap-4 min-w-[220px]">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 border-2 border-emerald-500 dark:border-emerald-400 flex items-center justify-center font-black text-xl text-emerald-600 dark:text-emerald-400 shadow-inner">
+              A+
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-300 font-semibold uppercase tracking-wider">
+                System Health
+              </p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">
+                98
+                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold ml-1">
+                  /100 Optimal
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-time Stat Pills Inside Banner */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/10">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 mb-4">Protected by Autonomous AI Agents</h1>
-            <div className="flex flex-wrap gap-8">
-              <div>
-                <p className="text-sm text-slate-500 font-medium mb-1">Total Scans Today</p>
-                <p className="text-4xl font-bold text-cyan-500">1,245</p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium mb-1">Threats Blocked</p>
-                <p className="text-4xl font-bold text-red-500">88</p>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium mb-1">High Risk Alerts</p>
-                <p className="text-4xl font-bold text-indigo-500">12</p>
-              </div>
-            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Scans Today
+            </p>
+            <p className="text-2xl font-black text-indigo-600 dark:text-cyan-400 mt-0.5">
+              {scansToday}
+            </p>
           </div>
-          <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl flex items-center gap-4 min-w-[200px]">
-            <div className="w-14 h-14 rounded-full border-4 border-slate-900 flex items-center justify-center font-bold text-xl">A+</div>
-            <div>
-              <p className="text-sm text-slate-500 font-medium">Security Score</p>
-              <p className="text-2xl font-bold text-emerald-600">94<span className="text-sm text-slate-400">/100</span></p>
-            </div>
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Threats Blocked
+            </p>
+            <p className="text-2xl font-black text-red-600 dark:text-red-400 mt-0.5">
+              {threatsBlocked}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              High Risk Alerts
+            </p>
+            <p className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
+              {highRiskAlerts}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              AI Model Status
+            </p>
+            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>{" "}
+              v1.0 Online
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="w-full xl:w-72 space-y-3">
-          <h3 className="text-sm font-bold text-slate-900">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="flex flex-col items-center justify-center p-3 bg-cyan-50 border border-cyan-200 text-cyan-700 rounded-xl hover:bg-cyan-100 transition-colors">
-              <LinkIcon size={18} className="mb-1" />
+      {/* 2. QUICK ACTIONS & USER CONTEXT ROW */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+          <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base mb-4 flex items-center gap-2">
+            <Activity
+              size={18}
+              className="text-indigo-600 dark:text-indigo-400"
+            />{" "}
+            Quick Security Scanners
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <RouterLink
+              to="/app/dashboard/url"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-900/50 text-cyan-700 dark:text-cyan-300 hover:scale-[1.02] transition-all cursor-pointer shadow-sm group"
+            >
+              <div className="p-3 rounded-xl bg-cyan-100 dark:bg-cyan-900/50 mb-2 group-hover:bg-cyan-200 transition-colors">
+                <LinkIcon size={20} />
+              </div>
               <span className="text-xs font-bold">Scan URL</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors">
-              <MessageSquare size={18} className="mb-1" />
-              <span className="text-xs font-bold">Paste Msg</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors">
-              <Upload size={18} className="mb-1" />
-              <span className="text-xs font-bold">Upload Pic</span>
-            </button>
-            <button className="flex flex-col items-center justify-center p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl hover:bg-red-100 transition-colors">
-              <AlertTriangle size={18} className="mb-1" />
-              <span className="text-xs font-bold">Report</span>
-            </button>
+            </RouterLink>
+
+            <RouterLink
+              to="/app/dashboard/message"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300 hover:scale-[1.02] transition-all cursor-pointer shadow-sm group"
+            >
+              <div className="p-3 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 mb-2 group-hover:bg-indigo-200 transition-colors">
+                <MessageSquare size={20} />
+              </div>
+              <span className="text-xs font-bold">Paste Message</span>
+            </RouterLink>
+
+            <RouterLink
+              to="/app/dashboard/image"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:scale-[1.02] transition-all cursor-pointer shadow-sm group"
+            >
+              <div className="p-3 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 mb-2 group-hover:bg-emerald-200 transition-colors">
+                <Upload size={20} />
+              </div>
+              <span className="text-xs font-bold">Scan Screenshot</span>
+            </RouterLink>
+
+            <RouterLink
+              to="/app/dashboard/qr"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 text-purple-700 dark:text-purple-300 hover:scale-[1.02] transition-all cursor-pointer shadow-sm group"
+            >
+              <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/50 mb-2 group-hover:bg-purple-200 transition-colors">
+                <QrCode size={20} />
+              </div>
+              <span className="text-xs font-bold">Scan QR Code</span>
+            </RouterLink>
+          </div>
+        </div>
+
+        {/* User Account Context Card */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm mb-3 flex items-center gap-2">
+              <UserCheck size={16} className="text-indigo-500" /> Account
+              Context
+            </h3>
+            <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+              <p className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="font-medium">User:</span>{" "}
+                <strong className="text-slate-900 dark:text-slate-200 capitalize truncate max-w-[120px]">
+                  {userName}
+                </strong>
+              </p>
+              <p className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="font-medium">Email:</span>{" "}
+                <strong className="text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                  {userEmail}
+                </strong>
+              </p>
+              <p className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="font-medium">Member Since:</span>{" "}
+                <strong className="text-indigo-600 dark:text-indigo-400">
+                  {memberSince}
+                </strong>
+              </p>
+              <p className="flex justify-between py-1">
+                <span className="font-medium">Auth:</span>{" "}
+                <strong className="text-emerald-600"> Verified</strong>
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center gap-1.5">
+            <Lock size={12} /> Secure Session Active
           </div>
         </div>
       </div>
 
-      {/* Sub Stats Row */}
+      {/* 3. SUB STATS GRID */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Total Scans", value: "15K+", color: "text-indigo-600", bg: "bg-indigo-50" },
-          { label: "Scam Detected", value: "342", color: "text-red-600", bg: "bg-red-50" },
-          { label: "Safe Links", value: "14.6K+", color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Risk Level", value: "Low", color: "text-emerald-600", bg: "bg-emerald-50" }
-        ].map((stat, i) => (
-          <div key={i} className="bg-white border border-slate-200 p-4 rounded-2xl flex justify-between items-center shadow-sm">
-            <div>
-              <p className="text-xs text-slate-500 font-medium mb-1">{stat.label}</p>
-              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-            </div>
-            <div className={`text-[10px] font-bold px-2 py-1 rounded-md ${stat.bg} ${stat.color}`}>
-              {stat.value}
-            </div>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl flex justify-between items-center shadow-sm">
+          <div>
+            <p className="text-xs text-slate-500 font-medium mb-1">
+              Total Scans Lifetime
+            </p>
+            <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+              {totalScansLifetime}
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* CHARTS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column Data Feed / Table etc */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Recent Scans Table */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm overflow-x-auto">
-            <h3 className="font-bold text-slate-900 mb-4">Recent Scans</h3>
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead>
-                <tr className="text-slate-500 border-b border-slate-100">
-                  <th className="pb-3 font-medium">Type</th>
-                  <th className="pb-3 font-medium">Threat</th>
-                  <th className="pb-3 font-medium">Risk Score</th>
-                  <th className="pb-3 font-medium">Time</th>
-                  <th className="pb-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-700">
-                {[
-                  { type: "URL", threat: "Phishing", score: "92", status: "Safe", color: "bg-emerald-100 text-emerald-700" },
-                  { type: "Scam", threat: "Phishing", score: "92", status: "BLOCKED", color: "bg-red-100 text-red-700" }
-                ].map((row, i) => (
-                  <tr key={i} className="border-b border-slate-50 last:border-0">
-                    <td className="py-3 font-medium">{row.type}</td>
-                    <td className="py-3">{row.threat}</td>
-                    <td className="py-3">{row.score}</td>
-                    <td className="py-3 text-slate-500">2m ago</td>
-                    <td className="py-3">
-                      <span className={`text-[10px] font-bold px-2 py-1 rounded ${row.color}`}>{row.status}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="text-[10px] font-black uppercase px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600">
+            LIVE
           </div>
         </div>
 
-        {/* Right Column Charts */}
-        <div className="space-y-6">
-           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <h3 className="font-bold text-slate-900 text-sm mb-1">Threat Detection Trend</h3>
-            <p className="text-xs text-slate-500 mb-4">Past 6 months activity</p>
-            {/* 🛠️ FIX 2: Replaced plain h-40 with a strictly locked wrapper (h-[200px] w-full min-h-0) to stop Recharts from expanding */}
-            <div className="h-[200px] w-full min-h-0">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl flex justify-between items-center shadow-sm">
+          <div>
+            <p className="text-xs text-slate-500 font-medium mb-1">
+              Scans Neutralized
+            </p>
+            <p className="text-2xl font-black text-red-600 dark:text-red-400">
+              {threatsBlocked}
+            </p>
+          </div>
+          <div className="text-[10px] font-black uppercase px-2.5 py-1 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600">
+            LIVE
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl flex justify-between items-center shadow-sm">
+          <div>
+            <p className="text-xs text-slate-500 font-medium mb-1">
+              Verified Safe Links
+            </p>
+            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+              {Math.max(0, totalScansLifetime - threatsBlocked)}
+            </p>
+          </div>
+          <div className="text-[10px] font-black uppercase px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600">
+            LIVE
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl flex justify-between items-center shadow-sm">
+          <div>
+            <p className="text-xs text-slate-500 font-medium mb-1">
+              Current Threat Level
+            </p>
+            <p className="text-xl font-black text-slate-800 dark:text-slate-100">
+              {currentThreatLevel}
+            </p>
+          </div>
+          <div
+            className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-xl ${threatBadgeColor}`}
+          >
+            LIVE
+          </div>
+        </div>
+      </div>
+
+      {/* 4. RECENT AUDIT LOGS & TREND CHART */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Audit Logs Table */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm lg:col-span-2 overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-base">
+                Your Recent Audit Logs
+              </h3>
+              <RouterLink
+                to="/app/dashboard/history"
+                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                View All History <ArrowRight size={14} />
+              </RouterLink>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-100 dark:border-slate-800 text-xs uppercase font-bold">
+                    <th className="pb-3">Type</th>
+                    <th className="pb-3">Target Input</th>
+                    <th className="pb-3">Risk Score</th>
+                    <th className="pb-3">Time</th>
+                    <th className="pb-3 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium">
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="py-6 text-center text-slate-400"
+                      >
+                        Loading audit logs from backend...
+                      </td>
+                    </tr>
+                  ) : historyList.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="py-6 text-center text-slate-400"
+                      >
+                        No scan records found. Run a scan to populate history!
+                      </td>
+                    </tr>
+                  ) : (
+                    historyList.slice(0, 4).map((row, i) => {
+                      const score = row.result?.riskScore ?? row.risk ?? 0;
+                      const status =
+                        row.result?.overallStatus ||
+                        row.result?.status ||
+                        (score > 40 ? "High Risk" : "Safe");
+                      const isSafe = status.toLowerCase().includes("safe");
+                      const statusColor = isSafe
+                        ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400";
+
+                      return (
+                        <tr
+                          key={row._id || row.id || i}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                        >
+                          <td className="py-3.5 font-bold uppercase">
+                            {row.scanType || "Scan"}
+                          </td>
+                          <td className="py-3.5 font-mono text-slate-500 truncate max-w-[200px]">
+                            {row.input || row.target || "N/A"}
+                          </td>
+                          <td className="py-3.5 font-black">{score}/100</td>
+                          <td className="py-3.5 text-slate-400">
+                            {row.createdAt || row.timestamp
+                              ? new Date(
+                                  row.createdAt || row.timestamp,
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "Just now"}
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <span
+                              className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${statusColor}`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Threat Detection Trend Chart */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                Threat Detection Trend
+              </h3>
+              <TrendingUp size={16} className="text-cyan-500" />
+            </div>
+            <p className="text-xs text-slate-400 mb-4">
+              Monthly comparison of blocked threats
+            </p>
+
+            <div className="h-[210px] w-full min-h-0">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendData}>
-                  <Line type="monotone" dataKey="threats" stroke="#06b6d4" strokeWidth={3} dot={false} />
-                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                </LineChart>
+                <AreaChart data={trendData}>
+                  <defs>
+                    <linearGradient
+                      id="colorThreats"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey="threats"
+                    stroke="#06b6d4"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorThreats)"
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      borderRadius: "12px",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "12px",
+                    }}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs text-slate-500">
+            <span>AI Threat Index</span>
+            <span className="font-bold text-cyan-500">+14% vs last month</span>
+          </div>
         </div>
       </div>
-
     </div>
   );
 }

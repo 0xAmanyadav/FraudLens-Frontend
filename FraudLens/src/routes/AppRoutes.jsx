@@ -31,14 +31,19 @@
 //   );
 // }
 
+// Coming Some Pages
+
+import Extension from "../services/Extension";
+
 import { Routes, Route } from "react-router-dom";
 import About from "../pages/About";
 import Login from "../pages/LOgin";
 import Signup from "../pages/Signup";
 import Landing from "../pages/Landing";
 
-// Layout
+// Layout & Protection
 import DashboardLayout from "../layouts/DashboardLayout";
+import ProtectedRoute from "../routes/ProtectedRoute"; // Path apne folder structure ke hisaab se check kar lein
 
 // Dashboard Pages
 import Dashboard from "../pages/Dashboard";
@@ -48,9 +53,8 @@ import ScanCenter from "../services/ScanCenter";
 import UrlScanner from "../services/UrlScanner";
 import MessageScanner from "../services/MessageScanner";
 import QrScanner from "../services/QrScanner";
-// import History from "../pages/History";
-
-
+import History from "../services/History";
+import ScreenshotScanner from "../services/ScreenshotScanner";
 
 export default function AppRoutes() {
   return (
@@ -59,10 +63,17 @@ export default function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/About" element={<About />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Signup />} />
+      <Route path="/signup" element={<Signup />} />
 
-      {/* ================= DASHBOARD SYSTEM (Sidebar + Navbar Layout) ================= */}
-      <Route path="/app/dashboard" element={<DashboardLayout />}>
+      {/* ================= DASHBOARD SYSTEM (Protected + Layout) ================= */}
+      <Route
+        path="/app/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
         {/* "index" ka matlab hai jab path sirf "/app/dashboard" ho, tab ye render hoga */}
         <Route index element={<Dashboard />} />
         <Route path="scan" element={<ScanCenter />} />
@@ -71,14 +82,9 @@ export default function AppRoutes() {
         <Route path="settings" element={<Settings />} />
         <Route path="message" element={<MessageScanner />} />
         <Route path="qr" element={<QrScanner />} />
-        {/* <Route path="History" element={<History />} /> */}
-
-        {/* 
-        
-        
-        <Route path="threats" element={<ThreatFeed />} />
-        <Route path="analytics" element={<Analytics />} />
-        */}
+        <Route path="History" element={<History />} />
+        <Route path="image" element={<ScreenshotScanner />} />
+        <Route path="extension" element={<Extension />} />
       </Route>
     </Routes>
   );
