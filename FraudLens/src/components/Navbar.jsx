@@ -24,7 +24,7 @@ export default function Navbar({ toggleSidebar }) {
 
   const currentUser = auth.currentUser;
   const displayName = currentUser?.displayName;
-  const displayInitial = displayName.charAt(0).toUpperCase();
+  const displayInitial = displayName ? displayName.charAt(0).toUpperCase() : "U";
   const isDark = mounted && theme === "dark";
 
   useEffect(() => {
@@ -142,9 +142,8 @@ export default function Navbar({ toggleSidebar }) {
               <span
                 className={`text-sm font-bold leading-tight capitalize ${isDark ? "text-white" : "text-slate-900"}`}
               >
-                {displayName}
+                {displayName || "User"}
               </span>
-              
             </div>
 
             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-sm font-bold text-sm">
@@ -169,7 +168,7 @@ export default function Navbar({ toggleSidebar }) {
                 <p
                   className={`text-sm font-bold capitalize ${isDark ? "text-white" : "text-slate-900"}`}
                 >
-                  {displayName}
+                  {displayName || "User"}
                 </p>
                 <p
                   className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
