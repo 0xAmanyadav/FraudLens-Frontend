@@ -152,7 +152,7 @@ export default function HistoryPage() {
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
             Track your latest security scans, view full deep-dive logs, and
-            manage scan history.
+            manage scan history. Click any row to view complete details.
           </p>
         </div>
       </div>
@@ -222,15 +222,17 @@ export default function HistoryPage() {
                     return (
                       <tr
                         key={recordId}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        onClick={() => handleViewDetails(recordId)}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                        title="Click to view full details"
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 transition-colors">
                               <IconComponent size={18} />
                             </div>
                             <div>
-                              <p className="font-bold capitalize text-sm">
+                              <p className="font-bold capitalize text-sm group-hover:text-indigo-600 transition-colors">
                                 {item.scanType || "Scan"}
                               </p>
                               <span className="text-[10px] font-mono text-indigo-500 font-semibold bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded">
@@ -272,7 +274,10 @@ export default function HistoryPage() {
                           <Clock size={14} className="opacity-70" />
                           {formatTimeAgo(item.createdAt || item.timestamp)}
                         </td>
-                        <td className="px-6 py-4 text-right space-x-2">
+                        <td
+                          className="px-6 py-4 text-right space-x-2"
+                          onClick={(e) => e.stopPropagation()} // Prevent row click when clicking action buttons
+                        >
                           <button
                             onClick={() => handleViewDetails(recordId)}
                             className="p-2 rounded-xl text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors cursor-pointer inline-block"
@@ -305,7 +310,7 @@ export default function HistoryPage() {
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
                 <span className="text-xs uppercase font-bold tracking-widest text-indigo-500">
-                  Scan Details Report
+                  Scan Details & Backend Audit Report
                 </span>
                 <h2 className="text-xl font-black capitalize">
                   {selectedItem.scanType || "Scan"} Analysis
@@ -352,8 +357,19 @@ export default function HistoryPage() {
                 <p className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-1 leading-relaxed text-slate-700 dark:text-slate-300">
                   {selectedItem.result?.summary ||
                     selectedItem.result?.aiExplanation ||
+                    selectedItem.summary ||
                     "No summary available."}
                 </p>
+              </div>
+
+              {/* Full Backend Data Raw Payload / Extra Properties Display */}
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase mb-1">
+                  Complete Backend Payload / Raw Details
+                </p>
+                <pre className="bg-slate-950 text-cyan-400 font-mono text-xs p-4 rounded-xl overflow-x-auto max-h-60 border border-slate-800">
+                  {JSON.stringify(selectedItem, null, 2)}
+                </pre>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -362,9 +378,9 @@ export default function HistoryPage() {
                     Risk Score
                   </p>
                   <p
-                    className={`text-xl font-black mt-1 ${(selectedItem.result?.riskScore ?? 0) > 40 ? "text-red-500" : "text-emerald-500"}`}
+                    className={`text-xl font-black mt-1 ${(selectedItem.result?.riskScore ?? selectedItem.risk ?? 0) > 40 ? "text-red-500" : "text-emerald-500"}`}
                   >
-                    {selectedItem.result?.riskScore ?? 0}/100
+                    {selectedItem.result?.riskScore ?? selectedItem.risk ?? 0}/100
                   </p>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
@@ -372,7 +388,9 @@ export default function HistoryPage() {
                     Timestamp
                   </p>
                   <p className="text-xs font-semibold mt-2 text-slate-600 dark:text-slate-400">
-                    {new Date(selectedItem.createdAt).toLocaleString()}
+                    {new Date(
+                      selectedItem.createdAt || selectedItem.timestamp
+                    ).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -407,7 +425,7 @@ export default function HistoryPage() {
                 onClick={() => setDeleteId(null)}
                 className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold rounded-2xl text-sm transition-colors cursor-pointer"
               >
-                Cancel
+                Cancel Delete
               </button>
               <button
                 onClick={handleConfirmDelete}
