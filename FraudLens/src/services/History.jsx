@@ -1,4 +1,7 @@
+import ScanReportModal from "./Model/ScanReportModal";
+
 import React, { useState, useEffect } from "react";
+
 import {
   History,
   Link as LinkIcon,
@@ -303,111 +306,12 @@ export default function HistoryPage() {
         </div>
       )}
 
-      {/* FULL DATA DETAILS MODAL */}
-      {selectedItem && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div>
-                <span className="text-xs uppercase font-bold tracking-widest text-indigo-500">
-                  Scan Details & Backend Audit Report
-                </span>
-                <h2 className="text-xl font-black capitalize">
-                  {selectedItem.scanType || "Scan"} Analysis
-                </h2>
-              </div>
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-4 text-sm">
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">
-                  Input / Scanned Target
-                </p>
-                <p className="font-mono bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-1 break-all text-slate-700 dark:text-slate-300">
-                  {selectedItem.input || selectedItem.target || "N/A"}
-                </p>
-              </div>
-
-              {/* Display Image if present in schema */}
-              {selectedItem.image?.url && (
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase mb-1">
-                    Scanned Image
-                  </p>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-48 bg-slate-950 flex justify-center">
-                    <img
-                      src={selectedItem.image.url}
-                      alt="Scan Target"
-                      className="object-contain h-48 w-full"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase">
-                  AI Summary & Explanation
-                </p>
-                <p className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-1 leading-relaxed text-slate-700 dark:text-slate-300">
-                  {selectedItem.result?.summary ||
-                    selectedItem.result?.aiExplanation ||
-                    selectedItem.summary ||
-                    "No summary available."}
-                </p>
-              </div>
-
-              {/* Full Backend Data Raw Payload / Extra Properties Display */}
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase mb-1">
-                  Complete Backend Payload / Raw Details
-                </p>
-                <pre className="bg-slate-950 text-cyan-400 font-mono text-xs p-4 rounded-xl overflow-x-auto max-h-60 border border-slate-800">
-                  {JSON.stringify(selectedItem, null, 2)}
-                </pre>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-400 uppercase">
-                    Risk Score
-                  </p>
-                  <p
-                    className={`text-xl font-black mt-1 ${(selectedItem.result?.riskScore ?? selectedItem.risk ?? 0) > 40 ? "text-red-500" : "text-emerald-500"}`}
-                  >
-                    {selectedItem.result?.riskScore ?? selectedItem.risk ?? 0}/100
-                  </p>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-400 uppercase">
-                    Timestamp
-                  </p>
-                  <p className="text-xs font-semibold mt-2 text-slate-600 dark:text-slate-400">
-                    {new Date(
-                      selectedItem.createdAt || selectedItem.timestamp
-                    ).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="px-5 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold text-sm cursor-pointer"
-              >
-                Close Report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      
+      {/* Scan Details Report Modal */}
+      <ScanReportModal
+        selectedItem={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
       {/* CUSTOM DELETE ALERT DIALOG */}
       {deleteId && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
