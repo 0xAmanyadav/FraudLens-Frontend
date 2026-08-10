@@ -1,166 +1,60 @@
 import { Link } from "react-router-dom";
-import { Mail } from "lucide-react";
-import logo from "../assets/company_logo/logo.png";
+import { ArrowUpRight, Mail, ShieldCheck } from "lucide-react";
+
+const footerLinks = {
+  Product: [
+    ["Scanner", "/#scanner"],
+    ["Features", "/#features"],
+    ["How it works", "/#how-it-works"],
+  ],
+  Company: [
+    ["About us", "/about"],
+    ["Sign in", "/login"],
+    ["Create account", "/register"],
+  ],
+};
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
-            <Link to="/" className="flex items-center gap-3">
-              <img
-                src={logo}
-                alt="FraudLens"
-                className="h-15 w-auto rounded-md"
-              />
-              {/* <span className="text-xl font-bold text-slate-900 dark:text-white">
-                FraudLens
-              </span> */}
-            </Link>
-
-            <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-sm">
-              AI-powered threat detection for phishing, scam websites,
-              fraudulent messages and screenshots.
-            </p>
-
-            <div className="flex items-center gap-4 mt-4">
-              <a
-                href="https://github.com/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-slate-600 hover:text-slate-900 dark:hover:text-white"
-              >
-                {/* <Github size={18} /> */}
-              </a>
-              <button
-                type="button"
-                onClick={(e) => e.preventDefault()}
-                className="text-slate-600 hover:text-slate-900 dark:hover:text-white"
-              >
-                {/* Twitter */}
-              </button>
-              <a
-                href="mailto:team@fraudlens.example"
-                className="text-slate-600 hover:text-slate-900 dark:hover:text-white"
-              >
-                <Mail size={18} />
-              </a>
-            </div>
-          </div>
-
-          {/* Product */}
-          <div>
-            <h3 className="font-semibold text-lg text-slate-900 dark:text-white">
-              Product
-            </h3>
-            <ul className="space-y-3 mt-4 text-slate-600 dark:text-slate-400">
-              <li>
-                <Link
-                  to="/scan"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  URL Scanner
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/scan"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Message Scanner
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/scan"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Screenshot Scanner
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/threats"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Live Threat Feed
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/settings"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Security Analytics
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="font-semibold text-lg text-slate-900 dark:text-white">
-              Company
-            </h3>
-            <ul className="space-y-3 mt-4 text-slate-600 dark:text-slate-400">
-              <li>
-                <Link
-                  to="/about"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={(e) => e.preventDefault()}
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Features
-                </button>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Roadmap
-                </a>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="hover:text-slate-900 dark:hover:text-white"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Team */}
-          <div>
-            <h3 className="font-semibold text-lg text-slate-900 dark:text-white">
-              Team
-            </h3>
-            <ul className="space-y-3 mt-4 text-slate-600 dark:text-slate-400">
-              <li>Aman Yadav — Frontend</li>
-              <li>Prakhar Gupta — Backend</li>
-              <li>Adarsh Gupta — UI/UX</li>
-              <li>Vinayak Chauhan — Presentation</li>
-              <li>Aditya Singh — Research</li>
-            </ul>
-          </div>
+    <footer className="border-t border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
+        <div>
+          <Link to="/" className="inline-flex items-center gap-2.5" aria-label="FraudLens home">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-blue-500/25">
+              <ShieldCheck size={22} />
+            </span>
+            <span className="text-xl font-black tracking-tight text-slate-950 dark:text-white">
+              Fraud<span className="text-blue-600 dark:text-cyan-300">Lens</span>
+            </span>
+          </Link>
+          <p className="mt-5 max-w-sm leading-7 text-slate-600 dark:text-slate-300">
+            Clear, AI-powered fraud intelligence for safer decisions online.
+          </p>
+          <a href="mailto:support@fraudlens.ai" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-blue-600 transition hover:text-cyan-600 dark:text-cyan-300">
+            <Mail size={16} /> support@fraudlens.ai <ArrowUpRight size={15} />
+          </a>
         </div>
 
-        <div className="border-t border-slate-200 dark:border-slate-800 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-slate-500">
-            © 2026 FraudLens. All Rights Reserved.
-          </p>
-          <p className="text-slate-500">Built with ❤️ for TNX Codathon 2K26</p>
+        {Object.entries(footerLinks).map(([heading, links]) => (
+          <div key={heading}>
+            <h2 className="text-sm font-bold uppercase tracking-[.16em] text-slate-950 dark:text-white">{heading}</h2>
+            <ul className="mt-5 space-y-3">
+              {links.map(([label, to]) => (
+                <li key={label}>
+                  <Link to={to} className="text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-300 dark:hover:text-cyan-300">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-slate-200 dark:border-white/10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+          <p>© {new Date().getFullYear()} FraudLens. All rights reserved.</p>
+          <p>See the threat. Keep your confidence.</p>
         </div>
       </div>
     </footer>

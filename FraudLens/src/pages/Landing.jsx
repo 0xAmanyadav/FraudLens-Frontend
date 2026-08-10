@@ -1,63 +1,309 @@
-import Footer from "../components/Footer";
-import Features from "../components/Features";
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import logo from "../assets/company_logo/logo.png";
-
+import Features from "../components/Features";
+import Footer from "../components/Footer";
 import {
-  Shield,
-  ArrowRight,
-  Lock,
-  Zap,
-  CheckCircle,
-  Users,
-  AlertTriangle,
-  Cpu,
-  BarChart3,
-  Radar,
-  Sun,
-  Moon,
-  Globe,
-  MessageSquare,
-  Image as ImageIcon,
-  Search,
   Activity,
-  FileText,
-  Smartphone,
-  CreditCard,
-  Briefcase,
+  ArrowRight,
+  Bot,
+  Check,
+  ChevronRight,
+  CircleAlert,
+  Cpu,
+  Globe,
+  Lock,
+  Mail,
+  Menu,
+  MessageSquare,
+  Moon,
+  Radar,
+  ScanLine,
+  Search,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Terminal,
+  UserRound,
+  X,
+  Zap,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
+/* ----------------------------- */
+/* Animation presets */
+/* ----------------------------- */
+
+const reveal = {
+  hidden: {
+    opacity: 0,
+    y: 35,
+  },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.1 },
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+    },
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
-};
-
-const floatingVariants = {
-  float: {
-    y: [0, -10, 0],
-    boxShadow: [
-      "0px 10px 30px rgba(59, 130, 246, 0.05)",
-      "0px 20px 40px rgba(59, 130, 246, 0.15)",
-      "0px 10px 30px rgba(59, 130, 246, 0.05)",
-    ],
-    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+const stagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+    },
   },
 };
+
+/* ----------------------------- */
+/* Scanner tabs */
+/* ----------------------------- */
+
+const scannerTabs = [
+  {
+    id: "url",
+    label: "URL",
+    placeholder: "https://suspicious-link.com",
+    icon: Globe,
+  },
+  {
+    id: "message",
+    label: "Message",
+    placeholder: "Paste suspicious SMS or message...",
+    icon: MessageSquare,
+  },
+  {
+    id: "email",
+    label: "Email",
+    placeholder: "Paste suspicious email...",
+    icon: Mail,
+  },
+];
+
+/* ----------------------------- */
+/* Floating cyber particles */
+/* ----------------------------- */
+
+function CyberParticles() {
+  const particles = Array.from({ length: 35 });
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {particles.map((_, i) => (
+        <motion.span
+          key={i}
+          initial={{
+            opacity: 0,
+            x: `${Math.random() * 100}%`,
+            y: `${Math.random() * 100}%`,
+          }}
+          animate={{
+            opacity: [0, 0.8, 0],
+            y: [
+              `${Math.random() * 100}%`,
+              `${Math.random() * 70}%`,
+              `${Math.random() * 100}%`,
+            ],
+          }}
+          transition={{
+            duration: 4 + Math.random() * 6,
+            repeat: Infinity,
+            delay: Math.random() * 4,
+            ease: "easeInOut",
+          }}
+          className="absolute h-1 w-1 rounded-full bg-cyan-500 dark:bg-cyan-300"
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ----------------------------- */
+/* Threat Radar */
+/* ----------------------------- */
+
+function ThreatRadar() {
+  return (
+    <div className="relative mx-auto h-[360px] w-[360px] sm:h-[430px] sm:w-[430px]">
+      {/* Outer glow */}
+      <div className="absolute inset-10 rounded-full bg-cyan-500/10 dark:bg-cyan-500/10 blur-3xl" />
+
+      {/* Radar rings */}
+      {[1, 0.78, 0.56, 0.34].map((scale, index) => (
+        <motion.div
+          key={index}
+          animate={{
+            scale: [scale, scale * 1.04, scale],
+            opacity: [0.35, 0.7, 0.35],
+          }}
+          transition={{
+            duration: 3 + index,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute left-1/2 top-1/2 aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-500/30 dark:border-cyan-400/20"
+          style={{
+            width: `${scale * 100}%`,
+          }}
+        />
+      ))}
+
+      {/* Rotating radar */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{
+          duration: 7,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="absolute inset-[16%] rounded-full"
+        style={{
+          background:
+            "conic-gradient(from 0deg, transparent 0deg, rgba(6,182,212,.3) 35deg, transparent 75deg)",
+        }}
+      />
+
+      {/* Radar crosshair */}
+      <div className="absolute left-1/2 top-1/2 h-[70%] w-px -translate-x-1/2 -translate-y-1/2 bg-cyan-500/20 dark:bg-cyan-400/10" />
+      <div className="absolute left-1/2 top-1/2 h-px w-[70%] -translate-x-1/2 -translate-y-1/2 bg-cyan-500/20 dark:bg-cyan-400/10" />
+
+      {/* Threat nodes */}
+      {[
+        "left-[23%] top-[30%]",
+        "right-[18%] top-[24%]",
+        "left-[17%] bottom-[25%]",
+        "right-[26%] bottom-[19%]",
+      ].map((position, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.5, 1, 0.5],
+          }}
+          transition={{
+            duration: 2 + i * 0.4,
+            repeat: Infinity,
+          }}
+          className={`absolute ${position} z-20`}
+        >
+          <div className="h-3 w-3 rounded-full bg-rose-500 dark:bg-rose-400 shadow-[0_0_20px_rgba(244,63,94,.9)]" />
+        </motion.div>
+      ))}
+
+      {/* Center */}
+      <motion.div
+        animate={{
+          boxShadow: [
+            "0 0 20px rgba(6,182,212,.15)",
+            "0 0 60px rgba(6,182,212,.35)",
+            "0 0 20px rgba(6,182,212,.15)",
+          ],
+        }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+        }}
+        className="absolute left-1/2 top-1/2 z-30 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[2rem] border border-cyan-500/30 dark:border-cyan-300/30 bg-white/90 dark:bg-[#071526]/90 backdrop-blur-xl shadow-xl"
+      >
+        <ShieldCheck className="text-cyan-600 dark:text-cyan-300" size={48} />
+
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute inset-2 rounded-[1.5rem] border border-dashed border-cyan-500/30 dark:border-cyan-400/20"
+        />
+      </motion.div>
+
+      {/* Labels */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: 3, repeat: Infinity }}
+        className="absolute left-0 top-16 rounded-xl border border-cyan-500/30 dark:border-cyan-400/20 bg-white/90 dark:bg-[#071526]/80 px-3 py-2 text-[10px] font-bold text-cyan-700 dark:text-cyan-300 backdrop-blur shadow-sm"
+      >
+        THREAT: 04
+      </motion.div>
+
+      <motion.div
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 3.5, repeat: Infinity }}
+        className="absolute bottom-14 right-0 rounded-xl border border-emerald-500/30 dark:border-emerald-400/20 bg-white/90 dark:bg-[#071526]/80 px-3 py-2 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 backdrop-blur shadow-sm"
+      >
+        SYSTEM SECURE
+      </motion.div>
+    </div>
+  );
+}
+
+/* ----------------------------- */
+/* AI Terminal */
+/* ----------------------------- */
+
+function AITerminal() {
+  const lines = [
+    "Initializing FraudLens AI...",
+    "Loading threat intelligence...",
+    "Analyzing behavioral patterns...",
+    "Cross-checking indicators...",
+    "Generating risk assessment...",
+  ];
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-cyan-400/15 bg-white dark:bg-[#020817] shadow-2xl shadow-slate-950/10 dark:shadow-cyan-950/30">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 px-4 py-3 bg-slate-50 dark:bg-transparent">
+        <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+
+        <span className="ml-3 text-[10px] font-mono text-slate-500">
+          fraudlens://ai-engine
+        </span>
+      </div>
+
+      <div className="space-y-2 p-5 font-mono text-xs">
+        {lines.map((line, i) => (
+          <motion.div
+            key={line}
+            initial={{ opacity: 0, x: -15 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: i * 0.6,
+              duration: 0.4,
+            }}
+            className="flex gap-2"
+          >
+            <span className="text-cyan-600 dark:text-cyan-400">&gt;</span>
+            <span className="text-slate-600 dark:text-slate-400">{line}</span>
+          </motion.div>
+        ))}
+
+        <motion.div
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 1, repeat: Infinity }}
+          className="pt-2 text-cyan-600 dark:text-cyan-300 font-bold"
+        >
+          █ AI ENGINE ACTIVE
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- */
+/* Main Landing */
+/* ----------------------------- */
 
 export default function Landing() {
-  const navigate = useNavigate(); // Added for redirection
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -66,545 +312,894 @@ export default function Landing() {
   }, []);
 
   const isDark = theme === "dark";
+  const [menuOpen, setMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("url");
+  const [query, setQuery] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState(null);
 
-  // Mocking Auth State (Set to false since this is the landing page)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const currentTab = scannerTabs.find((tab) => tab.id === activeTab);
 
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState(null);
+  const handleScan = () => {
+    if (!query.trim() || scanning) return;
 
-  const handleMockScan = (e) => {
-    e.preventDefault();
+    const signedIn = Boolean(
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      localStorage.getItem("user"),
+    );
 
-    // Check if user is logged in before scanning
-    if (!isLoggedIn) {
-      navigate("/login"); // Redirect to login page immediately
+    if (!signedIn) {
+      navigate("/login");
       return;
     }
 
-    // This code only runs if isLoggedIn is true
-    setIsScanning(true);
-    setScanResult(null);
+    setScanning(true);
+    setResult(null);
+
     setTimeout(() => {
-      setIsScanning(false);
-      setScanResult("danger");
-    }, 2000);
+      const suspicious =
+        /free|gift|verify|urgent|wallet|prize|crypto|login|bank|click/i.test(
+          query,
+        );
+
+      if (suspicious) {
+        setResult({
+          risk: "HIGH",
+          score: 92,
+          message:
+            "Multiple suspicious indicators detected. The signal contains patterns commonly associated with phishing, impersonation or social engineering.",
+        });
+      } else {
+        setResult({
+          risk: "LOW",
+          score: 16,
+          message:
+            "No major threat indicators were detected during this quick analysis.",
+        });
+      }
+
+      setScanning(false);
+    }, 1500);
   };
 
-  return (
-    <div className={mounted && isDark ? "dark" : ""}>
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-white overflow-x-hidden transition-colors duration-500 font-sans">
-        {/* Soft Light Gradients for Light Theme */}
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-blue-100/60 dark:bg-blue-600/10 rounded-full blur-[120px]"></div>
-          <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-indigo-100/50 dark:bg-purple-600/10 rounded-full blur-[120px]"></div>
-        </div>
+  const switchTab = (id) => {
+    setActiveTab(id);
+    setQuery("");
+    setResult(null);
+  };
 
-        {/* Navigation */}
-        <nav className="fixed top-0 w-full backdrop-blur-xl bg-white/80 dark:bg-[#0B1120]/80 border-b border-slate-200 dark:border-slate-800/80 z-50 transition-colors duration-500">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            {/* LOGO: use asset and link to home */}
-            <Link to="/" className="cursor-pointer">
-              <motion.div
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <img
-                  src={logo}
-                  alt="FraudLens"
-                  className="h-14 w-auto rounded-md"
-                />
-                <span className="sr-only">Home</span>
-              </motion.div>
+  if (!mounted) return null;
+
+  return (
+    <main className="min-h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#030712] dark:text-white transition-colors duration-500">
+      {/* ================================================= */}
+      {/* BACKGROUND */}
+      {/* ================================================= */}
+
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.25] dark:opacity-[0.18]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(6,182,212,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,.12) 1px, transparent 1px)",
+            backgroundSize: "50px 50px",
+          }}
+        />
+
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -60, 0],
+          }}
+          transition={{
+            duration: 16,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-cyan-400/20 dark:bg-cyan-500/10 blur-[120px]"
+        />
+
+        <motion.div
+          animate={{
+            x: [0, -100, 0],
+            y: [0, 70, 0],
+          }}
+          transition={{
+            duration: 19,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute -right-40 top-[30%] h-[550px] w-[550px] rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-[130px]"
+        />
+
+        <CyberParticles />
+      </div>
+
+      {/* ================================================= */}
+      {/* NAVBAR */}
+      {/* ================================================= */}
+
+      <nav className="relative z-50 border-b border-slate-200 dark:border-white/[0.06] bg-white/80 dark:bg-[#030712]/70 backdrop-blur-xl transition-colors">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+          <Link to="/" className="flex items-center gap-3">
+            <motion.div
+              whileHover={{
+                rotate: 8,
+                scale: 1.08,
+              }}
+              className="relative grid h-11 w-11 place-items-center rounded-xl border border-cyan-500/30 dark:border-cyan-300/20 bg-cyan-500/10 dark:bg-cyan-400/10 text-cyan-600 dark:text-cyan-300 shadow-sm"
+            >
+              {/* <img src={logo} alt="FraudLens" className="h-6 w-auto rounded" /> */}
+              <ShieldCheck size={26} className="text-blue-600" />
+
+              <motion.span
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 0, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                }}
+                className="absolute inset-0 rounded-xl border border-cyan-500 dark:border-cyan-400"
+              />
+            </motion.div>
+
+            <div>
+              <div className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                Fraud
+                <span className="text-cyan-600 dark:text-cyan-300">Lens</span>
+              </div>
+
+              <div className="hidden text-[8px] font-mono tracking-[.25em] text-slate-500 sm:block">
+                DIGITAL THREAT INTELLIGENCE
+              </div>
+            </div>
+          </Link>
+
+          <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-400 md:flex">
+            <a
+              href="#scanner"
+              className="transition hover:text-cyan-600 dark:hover:text-cyan-300"
+            >
+              Scanner
+            </a>
+            <a
+              href="#intelligence"
+              className="transition hover:text-cyan-600 dark:hover:text-cyan-300"
+            >
+              Intelligence
+            </a>
+            <a
+              href="#how-it-works"
+              className="transition hover:text-cyan-600 dark:hover:text-cyan-300"
+            >
+              How it works
+            </a>
+            <a
+              href="#features"
+              className="transition hover:text-cyan-600 dark:hover:text-cyan-300"
+            >
+              Features
+            </a>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.04] text-slate-700 dark:text-slate-300 transition hover:border-cyan-500/30 dark:hover:border-cyan-400/30 hover:text-cyan-600 dark:hover:text-cyan-300 shadow-sm"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+
+            <Link
+              to="/login"
+              className="hidden rounded-xl border border-slate-200 dark:border-white/10 px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 transition hover:border-cyan-500/30 dark:hover:border-cyan-400/30 hover:text-slate-900 dark:hover:text-white sm:block shadow-sm bg-white dark:bg-transparent"
+            >
+              Login
             </Link>
 
-            <motion.div
-              className="flex items-center gap-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <Link
+              to="/signup"
+              className="hidden rounded-xl bg-cyan-500 dark:bg-cyan-400 px-4 py-2.5 text-sm font-black text-slate-950 transition hover:bg-cyan-400 dark:hover:bg-cyan-300 sm:block shadow-md"
             >
-              <button
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className="relative w-14 h-8 rounded-full bg-slate-200 dark:bg-slate-700 transition-all duration-300"
-              >
-                <motion.div
-                  animate={{
-                    x: isDark ? 24 : 2,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                  }}
-                  className="absolute top-1 w-6 h-6 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center shadow-lg"
-                >
-                  {isDark ? (
-                    <Moon size={14} className="text-blue-400" />
-                  ) : (
-                    <Sun size={14} className="text-yellow-500" />
-                  )}
-                </motion.div>
-              </button>
+              Get Protected
+            </Link>
 
-              <div className="hidden sm:flex gap-3 items-center">
-                <button
-                  type="button"
-                  onClick={(e) => e.preventDefault()}
-                  className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 mr-4"
-                >
-                  How it Works
-                </button>
-
-                <button
-                  type="button"
-                  onClick={(e) => e.preventDefault()}
-                  className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 mr-4"
-                >
-                  Features
-                </button>
-
-                <Link
-                  to="/About"
-                  className="text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 mr-4"
-                >
-                  About
-                </Link>
-
-                {/* Updated Navbar Buttons */}
-                <Link
-                  to="/login"
-                  className="px-5 py-2.5 rounded-xl font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors shadow-sm"
-                >
-                  Log in
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20 transition-all duration-300"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </nav>
-
-        {/* 1. Hero Section */}
-        <section className="relative pt-40 pb-16 px-6 flex items-center z-10">
-          <div className="max-w-7xl mx-auto w-full text-center">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-col items-center gap-6 max-w-4xl mx-auto"
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-transparent md:hidden shadow-sm"
             >
-              <motion.div
-                variants={itemVariants}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-blue-700 dark:text-cyan-400 backdrop-blur-sm shadow-sm"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 dark:bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600 dark:bg-cyan-500"></span>
-                </span>
-                AI Scam Detection Engine Active
-              </motion.div>
-
-              <motion.h1
-                variants={itemVariants}
-                className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight text-slate-900 dark:text-white"
-              >
-                Think Like AI. <br />
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-400 dark:to-purple-500 bg-clip-text text-transparent">
-                  Defend Like an Expert.
-                </span>
-              </motion.h1>
-
-              <motion.p
-                variants={itemVariants}
-                className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl font-medium"
-              >
-                Every day, millions fall victim to digital fraud. Paste a
-                suspicious link, SMS, or screenshot below and let our
-                Gemini-powered engine detect the scam instantly.
-              </motion.p>
-
-              {/* LIVE SCANNER UI (Light Mode Optimized) */}
-              <motion.div
-                variants={itemVariants}
-                className="mt-8 w-full max-w-3xl bg-white/80 dark:bg-[#111827]/80 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl p-3 shadow-xl shadow-slate-200/50 dark:shadow-cyan-900/10 text-left relative z-20"
-              >
-                <div className="flex space-x-1 mb-3 px-1 border-b border-slate-100 dark:border-slate-800 pb-3">
-                  {[
-                    { id: "url", icon: Globe, label: "Scan URL" },
-                    {
-                      id: "msg",
-                      icon: MessageSquare,
-                      label: "Check SMS/Email",
-                    },
-                    { id: "img", icon: ImageIcon, label: "Upload Screenshot" },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab === tab.id ? "bg-slate-100 dark:bg-slate-800 text-blue-700 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-700" : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}
-                    >
-                      <tab.icon size={16} /> <span>{tab.label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <form
-                  onSubmit={handleMockScan}
-                  className="flex flex-col sm:flex-row gap-3"
-                >
-                  <div className="flex-1 flex items-center gap-3 px-4 bg-slate-50 dark:bg-[#0B1120] rounded-xl border border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                    <Search className="w-5 h-5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder={
-                        activeTab === "url"
-                          ? "Paste suspicious link (e.g., http://hdfc-update.xyz)..."
-                          : "Paste message or upload image..."
-                      }
-                      className="w-full bg-transparent border-none text-slate-900 dark:text-white focus:outline-none focus:ring-0 placeholder-slate-400 text-sm py-3"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isScanning}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 min-w-[160px]"
-                  >
-                    {isScanning ? (
-                      <>
-                        <Activity className="w-5 h-5 animate-spin" /> Scanning
-                      </>
-                    ) : (
-                      "Analyze Risk"
-                    )}
-                  </button>
-                </form>
-
-                {/* Mock Scan Result Display */}
-                {scanResult && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl flex gap-3 items-start"
-                  >
-                    <AlertTriangle
-                      className="text-red-600 dark:text-red-400 shrink-0 mt-0.5"
-                      size={20}
-                    />
-                    <div>
-                      <h4 className="font-bold text-red-800 dark:text-red-300">
-                        98% High Risk Scam Detected
-                      </h4>
-                      <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-1">
-                        AI Context: The domain mimics a legitimate bank. The
-                        message payload contains urgent psychological triggers
-                        common in phishing attacks.
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* 2. Tech Stack / Trust Banner */}
-        <div className="border-y border-slate-200 dark:border-slate-800/50 bg-white/50 dark:bg-slate-900/50 py-8 relative z-10">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            <span className="text-sm font-bold tracking-widest text-slate-400 uppercase">
-              Powered By
-            </span>
-            <div className="flex gap-10 items-center font-bold text-slate-700 dark:text-slate-300">
-              <span className="flex items-center gap-2">
-                <Cpu size={20} className="text-blue-500" /> Google Gemini API
-              </span>
-              <span className="flex items-center gap-2">
-                <Lock size={20} className="text-emerald-500" /> Supabase
-              </span>
-              <span className="flex items-center gap-2">
-                <Zap size={20} className="text-teal-500" /> FastAPI
-              </span>
-              <span className="flex items-center gap-2">
-                <Globe size={20} className="text-blue-400" /> React Vite
-              </span>
-            </div>
+              {menuOpen ? <X size={19} /> : <Menu size={19} />}
+            </button>
           </div>
         </div>
 
-        {/* 5. CTA Section */}
-        <section className="py-24 px-5 relative z-10">
-          <div className="max-w-3xl max-h-xl mx-auto">
-            <div
-              className="
-bg-blue-600
-dark:bg-slate-800
-rounded-[2rem]
-p-5
-md:p-10
-"
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#050b16] px-5 py-4 md:hidden shadow-xl"
             >
-              {/* Decorative Background Elements */}
-              {/* <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-                <div className="absolute top-[-50%] left-[-10%] w-96 h-96 bg-blue-500 dark:bg-blue-500/10 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-[-50%] right-[-10%] w-96 h-96 bg-indigo-500 dark:bg-purple-500/10 rounded-full blur-3xl"></div>
-              </div> */}
-
-              <div className="relative z-10">
-                <Shield size={48} className="text-white mx-auto mb-6" />
-                <h2 className="text-4xl md:text-4xl font-black mb-6 text-white leading-tight">
-                  Start Defending Your Digital Identity
-                </h2>
-                <p
-                  className="
-text-lg
-text-blue-100
-dark:text-slate-300
-
-max-w-2xl
-mx-auto
-
-mb-8
-"
-                >
-                  Create a secure dashboard to manage your scan history, view
-                  detailed reports, and contribute to the community feed.
-                </p>
-                <Link
-                  to="/register"
-                  className="
-inline-flex
-items-center
-gap-2
-
-bg-white
-text-blue-600
-
-px-8
-py-4
-
-rounded-xl
-font-bold
-
-hover:scale-105
-transition
-"
-                >
-                  Create Free Account
-                  <ArrowRight size={24} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. Workflow Section (How It Works) */}
-        <section
-          id="how-it-works"
-          className="py-24 px-6 relative z-10 bg-slate-50 dark:bg-[#0B1120]"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
-                How FraudLens Protects You
-              </h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400">
-                Threat detection happens in milliseconds, right in your browser.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
               {[
-                {
-                  step: "01",
-                  icon: FileText,
-                  title: "Input the Threat",
-                  desc: "Paste a suspicious URL, copy a weird SMS text, or upload a screenshot of a fake job offer.",
-                },
-                {
-                  step: "02",
-                  icon: Cpu,
-                  title: "AI Context Analysis",
-                  desc: "Our engine uses OCR to read images and Gemini to analyze the psychological intent behind the text.",
-                },
-                {
-                  step: "03",
-                  icon: CheckCircle,
-                  title: "Get Clear Results",
-                  desc: "Receive an instant Safe, Suspicious, or Scam verdict along with a detailed explanation of why.",
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-3xl p-8 shadow-sm relative overflow-hidden group"
+                ["Scanner", "#scanner"],
+                ["Intelligence", "#intelligence"],
+                ["How it works", "#how-it-works"],
+                ["Features", "#features"],
+              ].map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block border-b border-slate-100 dark:border-white/5 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300"
                 >
-                  <div className="absolute top-0 right-0 p-6 text-6xl font-black text-slate-50 dark:text-slate-800 group-hover:text-blue-50 dark:group-hover:text-slate-700 transition-colors -z-10 select-none">
-                    {item.step}
-                  </div>
-                  <div className="w-14 h-14 bg-blue-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 border border-blue-100 dark:border-slate-700 text-blue-600 dark:text-cyan-400 shadow-inner">
-                    <item.icon size={28} />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
-                    {item.title}
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
+                  {label}
+                </a>
               ))}
-            </div>
-          </div>
-        </section>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
 
-        {/* 4. Use Cases (What we catch) */}
-        <section className="py-24 px-6 relative z-10 bg-white dark:bg-[#111827] border-y border-slate-200 dark:border-slate-800">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-6">
-                We Catch What Standard Tools Miss
-              </h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-                Traditional security relies on known blocklists. Scammers create
-                new websites daily. FraudLens uses AI to read the context,
-                catching zero-day scams before they are reported.
-              </p>
+      {/* ================================================= */}
+      {/* HERO */}
+      {/* ================================================= */}
 
-              <div className="space-y-4">
-                {[
-                  {
-                    icon: Briefcase,
-                    title: "Fake Job Offers",
-                    desc: "Catches 'Work from home and earn ₹5k/day' WhatsApp scams.",
-                  },
-                  {
-                    icon: CreditCard,
-                    title: "Banking & KYC Fraud",
-                    desc: "Detects URLs mimicking HDFC, SBI, or ICICI login portals.",
-                  },
-                  {
-                    icon: Smartphone,
-                    title: "Delivery SMS Smishing",
-                    desc: "Flags 'Your package is delayed, update address' texts.",
-                  },
-                ].map((threat, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/30"
+      <section className="relative z-10 mx-auto grid min-h-[calc(100vh-75px)] max-w-7xl items-center gap-12 px-5 py-20 lg:grid-cols-[1fr_1fr] lg:px-8">
+        <motion.div variants={stagger} initial="hidden" animate="visible">
+          {/* <motion.div
+            variants={reveal}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 dark:border-cyan-400/20 bg-cyan-50 dark:bg-cyan-400/5 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[.2em] text-cyan-700 dark:text-cyan-300 shadow-sm"
+          >
+            <motion.span
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.3, repeat: Infinity }}
+              className="h-2 w-2 rounded-full bg-cyan-500 dark:bg-cyan-400"
+            />
+            AI THREAT ENGINE ONLINE
+          </motion.div> */}
+
+          <motion.h1
+            variants={reveal}
+            className="max-w-3xl text-5xl font-black leading-[1.1] tracking-[-.04em] text-slate-900 dark:text-white sm:text-6xl lg:text-5xl"
+          >
+            Think Like AI.
+            <br />
+            <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-violet-600 dark:from-cyan-300 dark:via-blue-400 dark:to-violet-400 bg-clip-text text-transparent">
+              Defend Like an Expert.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            variants={reveal}
+            className="mt-7 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-400 sm:text-lg"
+          >
+            FraudLens is an AI-powered digital threat intelligence platform that
+            analyzes suspicious links, messages and emails before you trust
+            them.
+          </motion.p>
+
+          <motion.div variants={reveal} className="mt-8 flex flex-wrap gap-3">
+            <button
+              onClick={() =>
+                document
+                  .getElementById("scanner")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="group flex items-center gap-2 rounded-xl bg-cyan-500 dark:bg-cyan-400 px-5 py-3.5 font-black text-slate-950 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-1 hover:bg-cyan-400 dark:hover:bg-cyan-300"
+            >
+              Start threat scan
+              <ArrowRight
+                size={18}
+                className="transition group-hover:translate-x-1"
+              />
+            </button>
+
+            <Link
+              to="/signup"
+              className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] px-5 py-3.5 font-bold text-slate-700 dark:text-slate-200 transition hover:-translate-y-1 hover:border-cyan-500/30 dark:hover:border-cyan-400/30 shadow-sm"
+            >
+              <ShieldCheck
+                size={18}
+                className="text-cyan-600 dark:text-cyan-400"
+              />
+              Create account
+            </Link>
+          </motion.div>
+
+          {/* Mini metrics */}
+          <motion.div
+            variants={reveal}
+            className="mt-10 grid max-w-lg grid-cols-3 border-y border-slate-200 dark:border-white/[0.07] py-5"
+          >
+            {[
+              ["99.7%", "Detection"],
+              ["<2s", "Analysis"],
+              ["24/7", "Monitoring"],
+            ].map(([value, label]) => (
+              <div
+                key={label}
+                className="border-r border-slate-200 dark:border-white/[0.07] px-4 first:pl-0 last:border-0"
+              >
+                <p className="text-xl font-black text-slate-900 dark:text-white">
+                  {value}
+                </p>
+                <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-500">
+                  {label}
+                </p>
+              </div>
+            ))}
+          </motion.div>
+        </motion.div>
+
+        {/* Radar */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1 }}
+          className="relative"
+        >
+          <ThreatRadar />
+
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="absolute bottom-0 left-1/2 w-[290px] -translate-x-1/2 sm:w-[340px]"
+          >
+            <AITerminal />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ================================================= */}
+      {/* SCANNER */}
+      {/* ================================================= */}
+
+      <section
+        id="scanner"
+        className="relative z-10 border-y border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#050b16] py-24 shadow-sm"
+      >
+        <div className="mx-auto max-w-5xl px-5">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={stagger}
+            className="text-center"
+          >
+            <motion.div
+              variants={reveal}
+              className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[.25em] text-cyan-600 dark:text-cyan-300"
+            >
+              <ScanLine size={15} />
+              LIVE THREAT SCANNER
+            </motion.div>
+
+            <motion.h2
+              variants={reveal}
+              className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl"
+            >
+              Don't guess.
+              <span className="text-cyan-600 dark:text-cyan-300">
+                {" "}
+                Scan it.
+              </span>
+            </motion.h2>
+
+            <motion.p
+              variants={reveal}
+              className="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400"
+            >
+              Submit a suspicious digital signal and let the FraudLens engine
+              investigate it.
+            </motion.p>
+
+            <motion.div
+              variants={reveal}
+              className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-[1.5rem] border border-slate-200 dark:border-cyan-400/15 bg-slate-50 dark:bg-[#020817] p-2 text-left shadow-xl dark:shadow-cyan-950/20"
+            >
+              {/* Tabs */}
+              <div className="flex gap-1 overflow-x-auto border-b border-slate-200 dark:border-white/[0.06] p-1">
+                {scannerTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const active = activeTab === tab.id;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => switchTab(tab.id)}
+                      className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
+                        active
+                          ? "bg-cyan-500 dark:bg-cyan-400 text-slate-950 shadow-sm"
+                          : "text-slate-500 hover:bg-slate-200 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.03] px-4 py-3 transition focus-within:border-cyan-500/40 dark:focus-within:border-cyan-400/40 shadow-sm">
+                    <Search
+                      size={19}
+                      className="shrink-0 text-cyan-600 dark:text-cyan-400"
+                    />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleScan();
+                        }
+                      }}
+                      placeholder={currentTab?.placeholder}
+                      className="w-full bg-transparent text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleScan}
+                    disabled={scanning || !query.trim()}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-cyan-500 dark:bg-cyan-400 px-6 py-3 font-black text-slate-950 transition hover:bg-cyan-400 dark:hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-40 shadow-md"
                   >
-                    <div className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm h-fit">
-                      <threat.icon
-                        size={20}
-                        className="text-indigo-600 dark:text-indigo-400"
+                    {scanning ? (
+                      <>
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 0.7,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        >
+                          <Radar size={18} />
+                        </motion.span>
+                        Analyzing
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={18} />
+                        Analyze
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {scanning && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-5 overflow-hidden rounded-xl border border-cyan-500/30 dark:border-cyan-400/20 bg-cyan-50 dark:bg-cyan-400/5 p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Activity
+                          size={18}
+                          className="animate-pulse text-cyan-600 dark:text-cyan-300"
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between text-xs font-mono">
+                            <span className="text-cyan-700 dark:text-cyan-300 font-bold">
+                              AI ANALYSIS
+                            </span>
+                            <span className="text-slate-500">scanning...</span>
+                          </div>
+                          <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                            <motion.div
+                              initial={{ x: "-100%" }}
+                              animate={{ x: "100%" }}
+                              transition={{
+                                duration: 1,
+                                repeat: Infinity,
+                              }}
+                              className="h-full w-1/2 bg-cyan-500 dark:bg-cyan-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {result && !scanning && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`mt-5 rounded-2xl border p-5 ${
+                        result.risk === "HIGH"
+                          ? "border-rose-400/30 bg-rose-50 dark:bg-rose-400/5 text-slate-900 dark:text-white"
+                          : "border-emerald-400/30 bg-emerald-50 dark:bg-emerald-400/5 text-slate-900 dark:text-white"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${
+                            result.risk === "HIGH"
+                              ? "bg-rose-100 dark:bg-rose-400/10 text-rose-600 dark:text-rose-400"
+                              : "bg-emerald-100 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400"
+                          }`}
+                        >
+                          {result.risk === "HIGH" ? (
+                            <ShieldAlert size={22} />
+                          ) : (
+                            <ShieldCheck size={22} />
+                          )}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <h3 className="font-black">
+                              {result.risk === "HIGH"
+                                ? "THREAT DETECTED"
+                                : "SIGNAL LOOKS SAFE"}
+                            </h3>
+
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-black ${
+                                result.risk === "HIGH"
+                                  ? "bg-rose-200/50 dark:bg-rose-400/10 text-rose-700 dark:text-rose-300"
+                                  : "bg-emerald-200/50 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-300"
+                              }`}
+                            >
+                              {result.score}% risk
+                            </span>
+                          </div>
+
+                          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                            {result.message}
+                          </p>
+
+                          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${result.score}%` }}
+                              transition={{ duration: 0.8 }}
+                              className={`h-full ${
+                                result.risk === "HIGH"
+                                  ? "bg-rose-500 dark:bg-rose-400"
+                                  : "bg-emerald-500 dark:bg-emerald-400"
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ================================================= */}
+      {/* INTELLIGENCE */}
+      {/* ================================================= */}
+
+      <section
+        id="intelligence"
+        className="relative z-10 mx-auto max-w-7xl px-5 py-28 lg:px-8"
+      >
+        <div className="grid items-center gap-16 lg:grid-cols-2">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+          >
+            <motion.div
+              variants={reveal}
+              className="flex items-center gap-2 font-mono text-xs font-bold tracking-[.2em] text-cyan-600 dark:text-cyan-300"
+            >
+              <Cpu size={16} />
+              INTELLIGENCE LAYER
+            </motion.div>
+
+            <motion.h2
+              variants={reveal}
+              className="mt-4 text-4xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl"
+            >
+              Security that
+              <br />
+              <span className="text-slate-400 dark:text-slate-500">
+                thinks in patterns.
+              </span>
+            </motion.h2>
+
+            <motion.p
+              variants={reveal}
+              className="mt-6 leading-8 text-slate-600 dark:text-slate-400"
+            >
+              Fraud is rarely just one suspicious word or one strange URL.
+              FraudLens looks at the bigger picture and connects multiple
+              signals to create a clearer risk assessment.
+            </motion.p>
+
+            <motion.div variants={reveal} className="mt-8 space-y-4">
+              {[
+                [
+                  ShieldCheck,
+                  "Behavioral analysis",
+                  "Identify social engineering and impersonation patterns.",
+                ],
+                [
+                  Radar,
+                  "Threat intelligence",
+                  "Cross-check suspicious indicators against known patterns.",
+                ],
+                [
+                  Bot,
+                  "AI reasoning",
+                  "Turn complex signals into a simple human-readable result.",
+                ],
+              ].map(([Icon, title, text]) => (
+                <motion.div
+                  key={title}
+                  whileHover={{ x: 8 }}
+                  className="group flex gap-4 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.02] p-4 transition hover:border-cyan-500/30 dark:hover:border-cyan-400/20 shadow-sm"
+                >
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-cyan-50 dark:bg-cyan-400/10 text-cyan-600 dark:text-cyan-300">
+                    <Icon size={20} />
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-white">
+                      {title}
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                      {text}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* Terminal visual */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative"
+          >
+            <div className="absolute -inset-10 rounded-full bg-cyan-500/5 blur-3xl" />
+
+            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-[#020817] p-5 shadow-xl dark:shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/[0.06] pb-4 bg-slate-50 dark:bg-transparent -mx-5 -mt-5 p-5">
+                <div className="flex items-center gap-3">
+                  <Terminal
+                    size={18}
+                    className="text-cyan-600 dark:text-cyan-300"
+                  />
+                  <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    THREAT_ANALYSIS
+                  </span>
+                </div>
+
+                <span className="flex items-center gap-2 font-mono text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  ONLINE
+                </span>
+              </div>
+
+              <div className="space-y-5 py-6">
+                {[
+                  ["DOMAIN_REPUTATION", 94],
+                  ["LANGUAGE_ANALYSIS", 87],
+                  ["BEHAVIOR_PATTERN", 91],
+                  ["IDENTITY_MATCH", 76],
+                ].map(([label, value], index) => (
+                  <div key={label}>
+                    <div className="mb-2 flex justify-between font-mono text-[10px]">
+                      <span className="text-slate-500">{label}</span>
+                      <span className="text-cyan-600 dark:text-cyan-300 font-bold">
+                        {value}%
+                      </span>
+                    </div>
+
+                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/5">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${value}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1, delay: index * 0.15 }}
+                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
                       />
                     </div>
+                  </div>
+                ))}
+
+                <div className="rounded-xl border border-rose-400/30 bg-rose-50 dark:bg-rose-400/5 p-4">
+                  <div className="flex items-center gap-3">
+                    <CircleAlert
+                      size={19}
+                      className="text-rose-500 dark:text-rose-400"
+                    />
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">
-                        {threat.title}
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                        {threat.desc}
+                      <p className="text-xs font-black text-rose-700 dark:text-rose-300">
+                        THREAT SIGNAL
+                      </p>
+                      <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-400">
+                        Suspicious impersonation pattern detected.
                       </p>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl bg-cyan-50 dark:bg-cyan-400/5 p-4 border border-cyan-500/20 dark:border-cyan-400/10">
+                  <div>
+                    <p className="text-[9px] font-mono text-slate-500">
+                      FINAL RISK SCORE
+                    </p>
+                    <p className="mt-1 text-3xl font-black text-cyan-600 dark:text-cyan-300">
+                      86
+                      <span className="text-sm text-slate-500">/100</span>
+                    </p>
+                  </div>
+                  <ShieldAlert
+                    size={42}
+                    className="text-rose-500 dark:text-rose-400"
+                  />
+                </div>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
 
-            {/* Visual Dashboard Representation */}
-            <motion.div
-              variants={floatingVariants}
-              animate="float"
-              className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl p-6 shadow-xl"
-            >
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <span className="font-bold text-slate-900 dark:text-white">
-                  Community Alert Feed
-                </span>
-                <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 text-xs font-bold rounded">
-                  Live
-                </span>
-              </div>
-              <div className="space-y-3">
-                {[1, 2, 3].map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 rounded-xl flex justify-between items-center opacity-80 hover:opacity-100 transition-opacity"
-                  >
-                    <div>
-                      <div className="text-xs font-mono text-slate-500 mb-1">
-                        Vector: SMS Message
-                      </div>
-                      <div className="font-bold text-sm text-slate-800 dark:text-slate-200">
-                        "Electricity Bill Update Required..."
-                      </div>
-                    </div>
-                    <AlertTriangle size={18} className="text-red-500" />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+      {/* ================================================= */}
+      {/* HOW IT WORKS */}
+      {/* ================================================= */}
+
+      <section
+        id="how-it-works"
+        className="relative z-10 border-y border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#050b16] py-28 shadow-sm"
+      >
+        <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          <div className="text-center">
+            <p className="font-mono text-xs font-bold tracking-[.25em] text-cyan-600 dark:text-cyan-300">
+              THE PROCESS
+            </p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+              Three steps.
+              <span className="text-slate-400 dark:text-slate-500">
+                {" "}
+                Zero confusion.
+              </span>
+            </h2>
           </div>
-        </section>
 
-        {/* 6. Footer */}
-        {/* <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8 px-6 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-4 gap-12 mb-16">
-              <div className="md:col-span-2">
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield size={24} className="text-blue-600 dark:text-cyan-400" />
-                  <span className="font-bold text-xl text-slate-900 dark:text-white">FraudLens</span>
+          <div className="relative mt-16 grid gap-5 md:grid-cols-3">
+            <div className="absolute left-[16%] right-[16%] top-16 hidden h-px bg-gradient-to-r from-cyan-500/0 via-cyan-500/30 to-cyan-500/0 md:block" />
+
+            {[
+              [
+                "01",
+                Search,
+                "Submit",
+                "Paste a suspicious URL, message or email.",
+              ],
+              [
+                "02",
+                ScanLine,
+                "Investigate",
+                "AI analyzes patterns, context and threat signals.",
+              ],
+              [
+                "03",
+                ShieldCheck,
+                "Protect",
+                "Get a clear risk score and recommended next step.",
+              ],
+            ].map(([number, Icon, title, text], index) => (
+              <motion.div
+                key={number}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                whileHover={{ y: -10 }}
+                className="group relative z-10 rounded-[1.5rem] border border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-[#07101e] p-7 transition hover:border-cyan-500/30 dark:hover:border-cyan-400/20 shadow-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="grid h-14 w-14 place-items-center rounded-2xl bg-cyan-100 dark:bg-cyan-400/10 text-cyan-600 dark:text-cyan-300 transition group-hover:bg-cyan-500 group-hover:text-slate-950">
+                    <Icon size={24} />
+                  </div>
+                  <span className="font-mono text-4xl font-black text-slate-300 dark:text-white/5">
+                    {number}
+                  </span>
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 text-sm max-w-sm mb-6">
-                  An AI-powered web platform built to instantly detect online scams, built for the AI & Agentic Systems track.
+
+                <h3 className="mt-7 text-xl font-black text-slate-900 dark:text-white">
+                  {title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                  {text}
                 </p>
-                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  Built by Team Securing_India:
-                  <div className="text-slate-500 dark:text-slate-400 mt-2 font-normal flex flex-wrap gap-x-4 gap-y-2">
-                    <span>Aman (Frontend)</span>
-                    <span>Adarsh</span>
-                    <span>Prakhar (Backend)</span>
-                    <span>Vinayak (PPT)</span>
-                    <span>Aditya (UI/UX)</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-bold mb-4 text-slate-900 dark:text-white">Features</h4>
-                <ul className="space-y-3 text-slate-600 dark:text-slate-400 text-sm">
-                  <li><a href="#" className="hover:text-blue-600 transition">URL Scanner</a></li>
-                  <li><a href="#" className="hover:text-blue-600 transition">SMS Analysis</a></li>
-                  <li><a href="#" className="hover:text-blue-600 transition">Screenshot OCR</a></li>
-                  <li><a href="#" className="hover:text-blue-600 transition">Community Feed</a></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-bold mb-4 text-slate-900 dark:text-white">Legal</h4>
-                <ul className="space-y-3 text-slate-600 dark:text-slate-400 text-sm">
-                  <li><a href="#" className="hover:text-blue-600 transition">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-blue-600 transition">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-blue-600 transition">Data Security</a></li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="border-t border-slate-200 dark:border-slate-800 pt-8 text-center text-slate-500 text-sm font-medium flex flex-col md:flex-row justify-between items-center">
-              <p>&copy; 2026 FraudLens. All rights reserved.</p>
-              <p className="mt-2 md:mt-0">Powered by MERN, FastAPI & Gemini</p>
-            </div>
-          </div>
-        </footer> */}
-        <Features />
 
-        {/* Footer */}
-        <Footer />
-      </div>
-    </div>
+                <div className="mt-6 flex items-center gap-1 text-xs font-bold text-cyan-600 dark:text-cyan-300">
+                  Explore
+                  <ChevronRight size={14} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================= */}
+      {/* FEATURES */}
+      {/* ================================================= */}
+
+      <section id="features" className="relative z-10">
+        <Features />
+      </section>
+
+      {/* ================================================= */}
+      {/* FINAL CTA */}
+      {/* ================================================= */}
+
+      <section className="relative z-10 mx-auto max-w-7xl px-5 py-28 lg:px-8">
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          className="relative overflow-hidden rounded-[2.5rem] border border-cyan-500/30 dark:border-cyan-400/20 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 dark:from-[#071827] dark:via-[#061323] dark:to-[#080b20] px-7 py-16 text-center shadow-2xl shadow-blue-500/20 dark:shadow-cyan-950/30 sm:px-12 text-white"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 dark:border-cyan-400/10 pointer-events-none"
+          />
+
+          <div className="relative">
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+              className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-white/30 dark:border-cyan-400/20 bg-white/10 dark:bg-cyan-400/10 text-white dark:text-cyan-300 shadow-inner"
+            >
+              <ShieldCheck size={30} />
+            </motion.div>
+
+            <p className="mt-6 font-mono text-[10px] font-bold tracking-[.3em] text-cyan-200 dark:text-cyan-300">
+              YOUR DIGITAL DEFENSE STARTS HERE
+            </p>
+
+            <h2 className="mx-auto mt-4 max-w-3xl text-4xl font-black tracking-tight sm:text-5xl">
+              Turn suspicious moments into
+              <span className="text-cyan-200 dark:text-cyan-300">
+                {" "}
+                confident decisions.
+              </span>
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-xl text-blue-100 dark:text-slate-400">
+              Join FraudLens and give yourself an AI-powered second opinion
+              whenever something online feels wrong.
+            </p>
+
+            <Link
+              to="/signup"
+              className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white dark:bg-cyan-400 px-6 py-3.5 font-black text-blue-700 dark:text-slate-950 transition hover:-translate-y-1 hover:bg-slate-100 dark:hover:bg-cyan-300 shadow-xl"
+            >
+              Enter FraudLens
+              <ArrowRight
+                size={18}
+                className="transition group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
+        </motion.div>
+      </section>
+
+      <Footer />
+    </main>
   );
 }
