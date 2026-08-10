@@ -195,23 +195,7 @@ export default function ScanReportModal({ selectedItem, onClose }) {
           </div>
         )}
 
-        {/* COMPLETE BACKEND PAYLOAD / RAW JSON COLLAPSIBLE */}
-        <div>
-          <details className="group bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
-            <summary className="flex items-center justify-between p-4 text-xs font-mono font-bold text-slate-400 cursor-pointer select-none hover:text-white transition-colors">
-              <span className="flex items-center gap-2">
-                <FileCode size={16} className="text-cyan-400" /> Complete Backend Payload / Raw Details
-              </span>
-              <span className="group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div className="p-4 pt-0 border-t border-slate-900">
-              <pre className="text-cyan-400 font-mono text-[11px] overflow-x-auto max-h-60 p-2">
-                {JSON.stringify(selectedItem, null, 2)}
-              </pre>
-            </div>
-          </details>
-        </div>
-
+       
         {/* FOOTER CLOSE BUTTON */}
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
           <button
