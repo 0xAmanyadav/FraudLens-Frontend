@@ -15,7 +15,7 @@ import {
 import { auth } from "../firebase/firebase";
 
 export default function Navbar({ toggleSidebar }) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const navigate = useNavigate();
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -23,11 +23,12 @@ export default function Navbar({ toggleSidebar }) {
   const dropdownRef = useRef(null);
 
   const currentUser = auth.currentUser;
-  const displayName = currentUser?.displayName || "Aman Yadav"; // Fallback to user summary profile name
+  const displayName = currentUser?.displayName || "Aman Yadav";
   const displayInitial = displayName ? displayName.charAt(0).toUpperCase() : "A";
   
-  // Safe theme mounting check to prevent hydration mismatch
-  const isDark = mounted && (theme === "dark" || document.documentElement.classList.contains("dark"));
+  // Use resolvedTheme for accurate theme switching detection
+  const currentTheme = resolvedTheme || theme;
+  const isDark = mounted && currentTheme === "dark";
 
   useEffect(() => {
     setMounted(true);
@@ -45,11 +46,14 @@ export default function Navbar({ toggleSidebar }) {
   }, []);
 
   const handleLogout = () => {
-    // Clear any active tokens/sessions if required
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
   };
+
+  if (!mounted) {
+    return <header className="h-16 flex items-center justify-between px-4 sm:px-6 w-full shrink-0 z-40 bg-white border-b border-slate-200" />;
+  }
 
   return (
     <header

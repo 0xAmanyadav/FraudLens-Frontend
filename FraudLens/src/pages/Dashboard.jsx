@@ -19,7 +19,9 @@ import {
 import { Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { auth } from "../firebase/firebase";
 import { fetchScanHistory } from "../services/api";
-import ScanReportModal from "../components/ScanReportModal"; // Import the detailed report modal we built earlier
+  // Import the detailed report modal we built earlier
+import ScanReportModal from "../services/Model/ScanReportModal";
+
 
 const trendData = [
   { name: "Jan", threats: 40, safe: 120 },
